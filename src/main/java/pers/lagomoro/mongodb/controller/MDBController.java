@@ -1,28 +1,17 @@
 package pers.lagomoro.mongodb.controller;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import pers.lagomoro.mongodb.controller.mdb.MDB;
+import pers.lagomoro.mongodb.controller.db.MDB;
 
-import javax.servlet.ServletContext;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/db")
-public class DBController {
+public class MDBController {
 
-    public DBController() {}
+    public MDBController() {}
 
     @GetMapping("/2-1")
     public List<Document> E2_1() throws Exception {
@@ -176,19 +165,13 @@ public class DBController {
         return "{status: 500, 'text': 'Success'}";
     }
 
-
-
-
-    @PostMapping("/test")
-    public String test() {
-        /*MongoClient mongoClient = new MongoClient("localhost", 27017);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase("user201800301015");
-        MongoCollection<Document> collection = mongoDatabase.getCollection("student");
-        FindIterable findIterable = collection.find();
-        MongoCursor cursor = findIterable.iterator();
-        while (cursor.hasNext()) {
-            System.out.println(cursor.next());
-        }*/
-        return "123";
+    @GetMapping("/6-1")
+    public List<String> E6_1() throws Exception {
+        return MDB.E6_1();
     }
+    @GetMapping("/6-2")
+    public List<Map.Entry<Integer, Double>> E6_2() throws Exception {
+        return MDB.E6_2();
+    }
+
 }

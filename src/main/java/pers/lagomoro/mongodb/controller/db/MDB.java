@@ -1,9 +1,6 @@
-package pers.lagomoro.mongodb.controller.mdb;
+package pers.lagomoro.mongodb.controller.db;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
@@ -21,8 +18,6 @@ import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 public class MDB {
     /**
@@ -535,6 +530,71 @@ public class MDB {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             return 0;
         }
+    }
+
+    //=================================================================================
+
+    public static List<String> E6_1(){
+        List<String> findAll = new ArrayList<>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        MongoCollection<Document> collection = mgdb.getCollection("student_course");
+        BasicDBObject b = new BasicDBObject();
+        b.append("name",1);
+        FindIterable<Document> findIterable = collection.find().projection(b);
+        MongoCursor<Document> mongoCursor = findIterable.iterator();
+        while (mongoCursor.hasNext()) {
+            findAll.add((String) mongoCursor.next().get("name"));
+        }
+        HashSet h = new HashSet(findAll);
+        findAll.clear();
+        findAll.addAll(h);
+        System.out.println(findAll.size());
+        return findAll;
+    }
+
+    public static List<Map.Entry<Integer, Double>> E6_2() {
+        MongoCollection<Document> collection = mgdb.getCollection("student_course");
+        BasicDBObject basicDBObject = new BasicDBObject().append("sid",1).append("score",1);
+        List<Document> findList = new ArrayList<>();
+        FindIterable<Document> iterables = collection.find().projection(basicDBObject);
+        MongoCursor<Document> cursor = iterables.iterator();
+        Map<Integer, List> scoreTable = new HashMap<>();
+        while (cursor.hasNext()) {
+            Document d = cursor.next();
+            Object score = d.get("score");
+            List<Double> scoreList;
+            if(scoreTable.get(d.get("sid")) == null){
+                scoreList = new ArrayList();
+            }else{
+                scoreList = scoreTable.get(d.get("sid"));
+            }
+            scoreList.add(Double.parseDouble(score.toString()));
+            scoreTable.put(Integer.parseInt(d.get("sid").toString()),scoreList);
+        }
+        Map<Integer, Double> avg = new HashMap<>();
+        for (Map.Entry<Integer, List> entry : scoreTable.entrySet()) {
+            double sum = 0;
+            for(int i=0;i<entry.getValue().size();i++){
+                sum += Double.parseDouble(entry.getValue().get(i).toString());
+            }
+            double average = sum/entry.getValue().size();
+            avg.put(Integer.parseInt(entry.getKey().toString()),average);
+        }
+
+        List<Map.Entry<Integer, Double>> list = new ArrayList<Map.Entry<Integer, Double>>(avg.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<Integer, Double>>()
+        {
+            @Override
+            public int compare(Map.Entry<Integer, Double> o1, Map.Entry<Integer, Double> o2)
+            {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        List<Map.Entry<Integer, Double>> result = new ArrayList<>();
+        for(int i=0;i<10;i++){
+            result.add(list.get(i));
+        }
+        return result;
     }
 
 }
